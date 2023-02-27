@@ -60,8 +60,8 @@ public class PlayerControllerTest {
         Response getResponse = client.get(requestDto);
         softAssert.assertEquals(getResponse.getStatusCode(), 200, "Response status code should be 200");
         PlayerGetByPlayerIdResponseDto responseDto = getResponse.as(PlayerGetByPlayerIdResponseDto.class);
-        softAssert.assertEquals(responseDto.getId(), playerId);
-        softAssert.assertEquals(responseDto.getAge(), Integer.parseInt(inputAge));
+        softAssert.assertEquals(responseDto.getId(), playerId, "Response id should be equal to expected");
+        softAssert.assertEquals(responseDto.getAge(), Integer.parseInt(inputAge), "Response age should be equal to expected");
         softAssert.assertAll();
     }
 
@@ -115,8 +115,8 @@ public class PlayerControllerTest {
         PlayerGetByPlayerIdResponseDto responseDto = getResponse.as(PlayerGetByPlayerIdResponseDto.class);
 
         softAssert.assertEquals(getResponse.getStatusCode(), 200, "Response status code should be 200");
-        softAssert.assertEquals(responseDto.getId(), playerId);
-        softAssert.assertEquals(responseDto.getPassword(), queryParams.get("password"));
+        softAssert.assertEquals(responseDto.getId(), playerId, "Response id should be equal to expected");
+        softAssert.assertEquals(responseDto.getPassword(), inputPassword, "Response password should be equal to expected");
 
         softAssert.assertAll();
     }
@@ -178,15 +178,14 @@ public class PlayerControllerTest {
 
         PlayerCreateResponseDto playerCreateResponseDto = userResponse.as(PlayerCreateResponseDto.class);
         softAssert.assertEquals(userResponse.getStatusCode(), 200, "The user should be successfully created");
-        int id = playerCreateResponseDto.getId();
 
         PlayerGetByPlayerIdRequestDto playerGetByPlayerIdRequestDto = PlayerGetByPlayerIdRequestDto.builder()
-                .playerId(id)
+                .playerId(playerCreateResponseDto.getId())
                 .build();
-        Response getResponse = client.get(playerGetByPlayerIdRequestDto); // назва змінної ???
+        Response getResponse = client.get(playerGetByPlayerIdRequestDto);
         PlayerGetByPlayerIdResponseDto responseDto = getResponse.as(PlayerGetByPlayerIdResponseDto.class);
         softAssert.assertEquals(getResponse.getStatusCode(), 200, "The user should be successfully created");
-        softAssert.assertEquals(responseDto.getScreenName(), screenName);
+        softAssert.assertEquals(responseDto.getScreenName(), screenName, "Response screenName should be equal to expected");
 
         Map<String, String> queryParamsForSecondUser = new HashMap<>();
         queryParams.put("age", "27");
@@ -213,7 +212,7 @@ public class PlayerControllerTest {
                 .size(), 1, "The screenName field should be unique");
 
         PlayerDeleteRequestDto deleteRequestDto = PlayerDeleteRequestDto.builder()
-                .playerId(id)
+                .playerId(playerCreateResponseDto.getId())
                 .build();
         client.delete(pathParam, deleteRequestDto);
 
@@ -279,15 +278,15 @@ public class PlayerControllerTest {
         Response response = client.get(requestDto);
         PlayerGetByPlayerIdResponseDto playerResponse = response.as(PlayerGetByPlayerIdResponseDto.class);
 
-        softAssert.assertEquals(response.getStatusCode(), 200);
-        softAssert.assertEquals(playerResponse.getRole(), "supervisor");
+        softAssert.assertEquals(response.getStatusCode(), 200, "Response status code should be 200");
+        softAssert.assertEquals(playerResponse.getRole(), "supervisor", "Response role should be equal to expected");
 
         PlayerDeleteRequestDto deleteRequestDto = PlayerDeleteRequestDto.builder()
                 .playerId(1)
                 .build();
 
         Response deleteResponse = client.delete("supervisor", deleteRequestDto);
-        softAssert.assertEquals(deleteResponse.getStatusCode(), 403);
+        softAssert.assertEquals(deleteResponse.getStatusCode(), 403, "Response status code should be 403");
 
         softAssert.assertAll();
     }
@@ -321,7 +320,7 @@ public class PlayerControllerTest {
                 .playerId(id)
                 .build();
         Response deleteResponse = client.delete(pathParam, playerDeleteRequestDto);
-        softAssert.assertEquals(deleteResponse.getStatusCode(), 204);
+        softAssert.assertEquals(deleteResponse.getStatusCode(), 204, "Response status code should be 204");
 
         Response getAllResponse = client.getAll();
         PlayerGetAllResponseDto playerGetAllResponseDto = getAllResponse.as(PlayerGetAllResponseDto.class);
@@ -344,9 +343,9 @@ public class PlayerControllerTest {
 
         Response response = client.get(requestDto);
         PlayerGetByPlayerIdResponseDto playerResponseDto = response.as(PlayerGetByPlayerIdResponseDto.class);
-        softAssert.assertEquals(response.getStatusCode(), 200);
-        softAssert.assertEquals(playerResponseDto.getId(), 1);
-        softAssert.assertEquals(playerResponseDto.getRole(), "supervisor");
+        softAssert.assertEquals(response.getStatusCode(), 200, "Response status code should be 200");
+        softAssert.assertEquals(playerResponseDto.getId(), 1, "Response id should be equal to expected");
+        softAssert.assertEquals(playerResponseDto.getRole(), "supervisor", "Response role should be equal to expected");
 
         PlayerUpdateRequestDto playerUpdateRequestDto = PlayerUpdateRequestDto.builder()
                 .age(32)
@@ -373,7 +372,7 @@ public class PlayerControllerTest {
         Response response = client.get(requestDto);
         PlayerGetByPlayerIdResponseDto responseDto = response.as(PlayerGetByPlayerIdResponseDto.class);
 
-        softAssert.assertEquals(response.getStatusCode(), 200);
+        softAssert.assertEquals(response.getStatusCode(), 200, "Response status code should be 200");
 
         PlayerUpdateRequestDto updateRequestDto = PlayerUpdateRequestDto.builder()
                 .age(Integer.parseInt(invalidAge))
@@ -385,7 +384,7 @@ public class PlayerControllerTest {
         Response responseAfterUpdating = client.get(requestDto);
         PlayerGetByPlayerIdResponseDto playerDtoAfterUpdating = responseAfterUpdating.as(PlayerGetByPlayerIdResponseDto.class);
 
-        softAssert.assertEquals(responseAfterUpdating.getStatusCode(), 200);
+        softAssert.assertEquals(responseAfterUpdating.getStatusCode(), 200, "Response status code should be 200");
         softAssert.assertEquals(playerDtoAfterUpdating.getId(), responseDto.getId(), "The id should be equal to expected");
         softAssert.assertEquals(playerDtoAfterUpdating.getAge(), responseDto.getAge(), "The age field should be the same as before updating");
 
@@ -394,7 +393,7 @@ public class PlayerControllerTest {
 
     // Bug:
     // The user was updated with invalid password field.
-    // Expected response status code 400 but was 200.
+    // The expected response status code 400 but was 200.
     //TODO enabled when bug will be fixed
     @Bug("bug_4")
     @Test(dataProvider = "inputInvalidPassword", enabled = false)
@@ -406,7 +405,7 @@ public class PlayerControllerTest {
         Response response = client.get(requestDto);
         PlayerGetByPlayerIdResponseDto responseDto = response.as(PlayerGetByPlayerIdResponseDto.class);
 
-        softAssert.assertEquals(response.getStatusCode(), 200);
+        softAssert.assertEquals(response.getStatusCode(), 200, "Response status code should be 200");
 
         PlayerUpdateRequestDto updateRequestDto = PlayerUpdateRequestDto.builder()
                 .password(invalidPassword)
@@ -418,9 +417,9 @@ public class PlayerControllerTest {
         Response responseAfterUpdating = client.get(requestDto);
         PlayerGetByPlayerIdResponseDto playerDtoAfterUpdating = responseAfterUpdating.as(PlayerGetByPlayerIdResponseDto.class);
 
-        softAssert.assertEquals(responseAfterUpdating.getStatusCode(), 200);
+        softAssert.assertEquals(responseAfterUpdating.getStatusCode(), 200, "Response status code should be 200");
         softAssert.assertEquals(playerDtoAfterUpdating.getId(), responseDto.getId(), "The id should be equal to expected");
-        softAssert.assertEquals(playerDtoAfterUpdating.getPassword(), responseDto.getPassword(), "The password field should not be updated");
+        softAssert.assertEquals(playerDtoAfterUpdating.getPassword(), responseDto.getPassword(), "The password field should be equal to expected");
 
         softAssert.assertAll();
     }
@@ -440,7 +439,7 @@ public class PlayerControllerTest {
         Response response = client.get(requestDto);
         PlayerGetByPlayerIdResponseDto responseDto = response.as(PlayerGetByPlayerIdResponseDto.class);
 
-        softAssert.assertEquals(response.getStatusCode(), 200);
+        softAssert.assertEquals(response.getStatusCode(), 200, "Response status code should be 200");
 
         PlayerUpdateRequestDto updateRequestDto = PlayerUpdateRequestDto.builder()
                 .gender("s")
@@ -452,7 +451,7 @@ public class PlayerControllerTest {
         Response responseAfterUpdating = client.get(requestDto);
         PlayerGetByPlayerIdResponseDto playerDtoAfterUpdating = responseAfterUpdating.as(PlayerGetByPlayerIdResponseDto.class);
 
-        softAssert.assertEquals(responseAfterUpdating.getStatusCode(), 200);
+        softAssert.assertEquals(responseAfterUpdating.getStatusCode(), 200, "Response status code should be 200");
         softAssert.assertEquals(playerDtoAfterUpdating.getId(), responseDto.getId(), "The id should be equal to expected");
         softAssert.assertEquals(playerDtoAfterUpdating.getGender(), responseDto.getGender(), "The gender field should not be updated");
 
