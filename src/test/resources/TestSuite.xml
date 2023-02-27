@@ -1,0 +1,7 @@
+<suite name="API Test Suite">
+    <test name="API PlayerController tests" parallel="methods" thread-count="3">
+        <classes>
+            <class name="api.playercontroller.PlayerControllerTest"/>
+        </classes>
+    </test>
+</suite>
